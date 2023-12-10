@@ -1,0 +1,9 @@
+server:
+  port: 8000
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: 201550
+    url: jdbc:mysql://localhost:3306/database?useUnicode=true&characterEncoding=utf8&serverTimezone=GMT%2B8
+    type: com.zaxxer.hikari.HikariDataSource
