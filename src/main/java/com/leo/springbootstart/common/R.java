@@ -68,5 +68,8 @@ public class R<T> implements Serializable {
     public static <T> R<T> failed(String message) {
         return new R<T>(ApiCode.FAILED.getCode(), message, null);
     }
+    public static R failed(ErrorCode errorCode, String message) {
+        return new R(errorCode.getCode(), null, message);
+    }
 
 }

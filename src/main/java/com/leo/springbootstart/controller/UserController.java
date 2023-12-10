@@ -1,6 +1,8 @@
 package com.leo.springbootstart.controller;
 
+import com.leo.springbootstart.common.ErrorCode;
 import com.leo.springbootstart.common.R;
+import com.leo.springbootstart.exception.BusinessException;
 import com.leo.springbootstart.model.dto.UserAddRequest;
 import com.leo.springbootstart.model.entity.User;
 import com.leo.springbootstart.service.UserService;
@@ -19,9 +21,15 @@ public class UserController {
 
     @RequestMapping("/add")
     public R<Long> addUser(@RequestBody UserAddRequest userAddRequest) {
+        if (userAddRequest == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
         User user = new User();
         BeanUtils.copyProperties(userAddRequest, user);
         boolean result = userService.save(user);
+        if (!result) {
+            throw new BusinessException(ErrorCode.OPERATION_ERROR);
+        }
         return R.success(user.getId());
     }
 }
