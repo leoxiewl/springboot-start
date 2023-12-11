@@ -1,10 +1,10 @@
 package com.leo.springbootstart.model.dto;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
+import lombok.Data;
 
 import java.io.Serializable;
 
+@Data
 public class UserAddRequest implements Serializable {
     /**
      * 用户昵称

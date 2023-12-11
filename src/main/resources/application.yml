@@ -7,3 +7,10 @@ spring:
     password: 201550
     url: jdbc:mysql://localhost:3306/database?useUnicode=true&characterEncoding=utf8&serverTimezone=GMT%2B8
     type: com.zaxxer.hikari.HikariDataSource
+  # 解决swagger启动报错问题
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+#是否激活 swagger true or false
+swagger:
+  enable: true

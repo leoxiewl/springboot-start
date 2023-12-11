@@ -1,7 +1,10 @@
 package com.leo.springbootstart.common;
 
+import lombok.Data;
+
 import java.io.Serializable;
 
+@Data
 public class R<T> implements Serializable {
 
     private int code;
