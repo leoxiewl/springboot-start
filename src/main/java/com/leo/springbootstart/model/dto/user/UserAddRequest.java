@@ -1,4 +1,4 @@
-package com.leo.springbootstart.model.dto;
+package com.leo.springbootstart.model.dto.user;
 
 import lombok.Data;
 
