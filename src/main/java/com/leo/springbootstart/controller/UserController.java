@@ -4,6 +4,7 @@ import com.leo.springbootstart.common.ApiCode;
 import com.leo.springbootstart.common.DeleteRequest;
 import com.leo.springbootstart.common.R;
 import com.leo.springbootstart.model.dto.user.UserAddRequest;
+import com.leo.springbootstart.model.dto.user.UserUpdateRequest;
 import com.leo.springbootstart.model.entity.User;
 import com.leo.springbootstart.service.UserService;
 import org.springframework.beans.BeanUtils;
@@ -60,5 +61,61 @@ public class UserController {
             return R.failed(ApiCode.FAILED.getCode(), "删除失败");
         }
         return R.success(true);
+    }
+
+    /**
+     * admin 更新用户
+     *
+     * @param userUpdateRequest
+     * @return
+     */
+    @PostMapping("/update")
+    public R<Long> updateUser(@RequestBody UserUpdateRequest userUpdateRequest) {
+        if (userUpdateRequest == null) {
+            return R.failed(ApiCode.FAILED.getCode(), "参数错误");
+        }
+        
+        long id = userUpdateRequest.getId();
+        String userName = userUpdateRequest.getUserName();
+        String userAccount = userUpdateRequest.getUserAccount();
+        String userPassword = userUpdateRequest.getUserPassword();
+        String userAvatar = userUpdateRequest.getUserAvatar();
+        Integer gender = userUpdateRequest.getGender();
+        String userRole = userUpdateRequest.getUserRole();
+        // 传入参数不为空才加入到 update 中
+        User user = new User();
+        if (id > 0) {
+            user.setId(id);
+        }
+        if (userName != null && !userName.isEmpty()) {
+            user.setUserName(userName);
+        }
+        if (userAccount != null && !userAccount.isEmpty()) {
+            user.setUserAccount(userAccount);
+        }
+        if (userPassword != null && !userPassword.isEmpty()) {
+            user.setUserPassword(userPassword);
+        }
+        if (userAvatar != null && !userAvatar.isEmpty()) {
+            user.setUserAvatar(userAvatar);
+        }
+        if (gender >= 0) {
+            user.setGender(gender);
+        }
+        if (userRole != null && !userRole.isEmpty()) {
+            user.setUserRole(userRole);
+        }
+
+        // 判断要修改的用户是否存在
+        User userExist = userService.getById(id);
+        if (userExist == null) {
+            return R.failed(ApiCode.FAILED.getCode(), "用户不存在");
+        }
+
+        boolean result = userService.updateById(user);
+        if (!result) {
+            return R.failed(ApiCode.FAILED.getCode(), "更新失败");
+        }
+        return R.success(user.getId());
     }
 }
