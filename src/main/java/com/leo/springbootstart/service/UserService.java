@@ -1,7 +1,12 @@
 package com.leo.springbootstart.service;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.leo.springbootstart.model.dto.user.UserQueryRequest;
 import com.leo.springbootstart.model.entity.User;
+import com.leo.springbootstart.model.vo.UserVO;
+
+import java.util.List;
 
 /**
  * @author brianxie
@@ -9,5 +14,21 @@ import com.leo.springbootstart.model.entity.User;
  * @createDate 2023-12-10 23:03:39
  */
 public interface UserService extends IService<User> {
+    /**
+     * 获取查询条件
+     *
+     * @param userQueryRequest
+     * @return
+     */
+    QueryWrapper<User> getQueryWrapper(UserQueryRequest userQueryRequest);
 
+    List<UserVO> transferUserVOList(List<User> userList);
+
+    /**
+     * 获取脱敏的用户信息
+     *
+     * @param user
+     * @return
+     */
+    UserVO transferUserVO(User user);
 }

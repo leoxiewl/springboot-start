@@ -1,25 +1,68 @@
 package com.leo.springbootstart.controller;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.leo.springbootstart.common.ApiCode;
 import com.leo.springbootstart.common.DeleteRequest;
 import com.leo.springbootstart.common.R;
 import com.leo.springbootstart.model.dto.user.UserAddRequest;
+import com.leo.springbootstart.model.dto.user.UserQueryRequest;
 import com.leo.springbootstart.model.dto.user.UserUpdateRequest;
 import com.leo.springbootstart.model.entity.User;
+import com.leo.springbootstart.model.vo.UserVO;
 import com.leo.springbootstart.service.UserService;
 import org.springframework.beans.BeanUtils;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 @RestController
 @RequestMapping("/user")
 public class UserController {
     @Resource
     private UserService userService;
+
+    /**
+     * 通过 id 获取 userVO 类
+     *
+     * @param id
+     * @return
+     */
+    @GetMapping("/get/vo")
+    public R<UserVO> getUserVOById(long id) {
+        if (id <= 0) {
+            return R.failed(ApiCode.FAILED.getCode(), "参数错误");
+        }
+        UserVO userVO = new UserVO();
+        User user = userService.getById(id);
+        if (user == null) {
+            return R.failed(ApiCode.FAILED.getCode(), "用户不存在");
+        }
+        BeanUtils.copyProperties(user, userVO);
+        return R.success(userVO);
+    }
+
+    @PostMapping("/list/page/vo")
+    public R<Page<UserVO>> listUserVOByPage(@RequestBody UserQueryRequest userQueryRequest) {
+        long current = userQueryRequest.getCurrent();
+        if (current <= 0) {
+            current = 1;
+            userQueryRequest.setCurrent(current);
+        }
+        long pageSize = userQueryRequest.getPageSize();
+        if (pageSize <= 0) {
+            pageSize = 10;
+            userQueryRequest.setPageSize(pageSize);
+        }
+        // 获取用户信息
+        Page<User> page = userService.page(new Page<>(userQueryRequest.getCurrent(), userQueryRequest.getPageSize()),
+                userService.getQueryWrapper(userQueryRequest));
+        // 把 User 信息转化为 UserVO 信息
+        List<UserVO> userVOS = userService.transferUserVOList(page.getRecords());
+        Page<UserVO> userVOPage = new Page<>();
+        userVOPage.setRecords(userVOS);
+        return R.success(userVOPage);
+    }
 
     /**
      * admin 添加用户
@@ -64,7 +107,7 @@ public class UserController {
     }
 
     /**
-     * admin 更新用户
+     * 更新用户
      *
      * @param userUpdateRequest
      * @return
@@ -74,10 +117,9 @@ public class UserController {
         if (userUpdateRequest == null) {
             return R.failed(ApiCode.FAILED.getCode(), "参数错误");
         }
-        
+
         long id = userUpdateRequest.getId();
         String userName = userUpdateRequest.getUserName();
-        String userAccount = userUpdateRequest.getUserAccount();
         String userPassword = userUpdateRequest.getUserPassword();
         String userAvatar = userUpdateRequest.getUserAvatar();
         Integer gender = userUpdateRequest.getGender();
@@ -89,9 +131,6 @@ public class UserController {
         }
         if (userName != null && !userName.isEmpty()) {
             user.setUserName(userName);
-        }
-        if (userAccount != null && !userAccount.isEmpty()) {
-            user.setUserAccount(userAccount);
         }
         if (userPassword != null && !userPassword.isEmpty()) {
             user.setUserPassword(userPassword);
@@ -112,10 +151,50 @@ public class UserController {
             return R.failed(ApiCode.FAILED.getCode(), "用户不存在");
         }
 
+        // 没有 id 不能更新
         boolean result = userService.updateById(user);
         if (!result) {
             return R.failed(ApiCode.FAILED.getCode(), "更新失败");
         }
         return R.success(user.getId());
+    }
+
+    /**
+     * admin 根据 id 获取用户详情
+     *
+     * @param id
+     * @return
+     */
+    @GetMapping("/get")
+    public R<User> getUserById(long id) {
+        if (id <= 0) {
+            return R.failed(ApiCode.FAILED.getCode(), "参数错误");
+        }
+        User user = userService.getById(id);
+        if (user == null) {
+            return R.failed(ApiCode.FAILED.getCode(), "用户不存在");
+        }
+        return R.success(user);
+    }
+
+    /**
+     * admin 分页获取用户列表
+     *
+     * @return
+     */
+    @PostMapping("/list/page")
+    public R<Page<User>> listUserByPage(@RequestBody UserQueryRequest userQueryRequest) {
+        long current = userQueryRequest.getCurrent();
+        if (current <= 0) {
+            current = 1;
+            userQueryRequest.setCurrent(current);
+        }
+        long pageSize = userQueryRequest.getPageSize();
+        if (pageSize <= 0) {
+            pageSize = 10;
+            userQueryRequest.setPageSize(pageSize);
+        }
+        Page<User> userPage = userService.page(new Page<>(current, pageSize), userService.getQueryWrapper(userQueryRequest));
+        return R.success(userPage);
     }
 }

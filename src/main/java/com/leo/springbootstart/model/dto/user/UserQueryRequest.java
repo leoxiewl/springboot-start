@@ -1,10 +1,10 @@
 package com.leo.springbootstart.model.dto.user;
 
+import com.leo.springbootstart.common.PageRequest;
 import lombok.Data;
 
 @Data
-public class UserUpdateRequest {
-
+public class UserQueryRequest extends PageRequest {
     private long id;
 
     /**
@@ -13,19 +13,9 @@ public class UserUpdateRequest {
     private String userName;
 
     /**
-     * 密码
+     * 账号
      */
-    private String userPassword;
-
-    /**
-     * 用户头像
-     */
-    private String userAvatar;
-
-    /**
-     * 性别
-     */
-    private Integer gender;
+    private String userAccount;
 
     /**
      * 用户角色：user / admin

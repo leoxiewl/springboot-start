@@ -1,11 +1,12 @@
-package com.leo.springbootstart.model.dto.user;
+package com.leo.springbootstart.model.vo;
 
 import lombok.Data;
 
-@Data
-public class UserUpdateRequest {
+import java.util.Date;
 
-    private long id;
+@Data
+public class UserVO {
+    private Long id;
 
     /**
      * 用户昵称
@@ -13,9 +14,9 @@ public class UserUpdateRequest {
     private String userName;
 
     /**
-     * 密码
+     * 账号
      */
-    private String userPassword;
+    private String userAccount;
 
     /**
      * 用户头像
@@ -31,4 +32,14 @@ public class UserUpdateRequest {
      * 用户角色：user / admin
      */
     private String userRole;
+
+    /**
+     * 创建时间
+     */
+    private Date createTime;
+
+    /**
+     * 更新时间
+     */
+    private Date updateTime;
 }
