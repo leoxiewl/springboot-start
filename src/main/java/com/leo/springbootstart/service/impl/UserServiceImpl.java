@@ -8,6 +8,7 @@ import com.leo.springbootstart.exception.BusinessException;
 import com.leo.springbootstart.mapper.UserMapper;
 import com.leo.springbootstart.model.dto.user.UserQueryRequest;
 import com.leo.springbootstart.model.entity.User;
+import com.leo.springbootstart.model.vo.LoginUserVO;
 import com.leo.springbootstart.model.vo.UserVO;
 import com.leo.springbootstart.service.UserService;
 import com.leo.springbootstart.utils.AccountValidator;
@@ -17,9 +18,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static com.leo.springbootstart.constant.CommonConstant.USER_LOGIN_STATE;
 
 /**
  * @author brianxie
@@ -121,6 +125,35 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             }
             return user.getId();
         }
+    }
+
+    @Override
+    public LoginUserVO userLogin(String userAccount, String userPassword, HttpServletRequest request) {
+        if (StringUtils.isAnyBlank(userAccount, userPassword)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        if (userAccount.length() < 4 || !AccountValidator.isValidAccount(userAccount)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR.getCode(), "账号格式错误");
+        }
+        if (userPassword.length() < 8 || userPassword.length() > 16) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR.getCode(), "密码格式错误");
+        }
+        String encryptPassword = DigestUtils.md5DigestAsHex((CommonConstant.SALT + userPassword).getBytes());
+
+        User user = userMapper.selectOne(new QueryWrapper<User>().eq("user_account", userAccount));
+        if (user == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户不存在");
+        }
+        String originPassword = user.getUserPassword();
+        if (!encryptPassword.equals(originPassword)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "密码错误");
+        }
+        LoginUserVO loginUserVO = new LoginUserVO();
+        BeanUtils.copyProperties(user, loginUserVO);
+
+        request.getSession().setAttribute(USER_LOGIN_STATE, loginUserVO);
+
+        return loginUserVO;
     }
 }
 

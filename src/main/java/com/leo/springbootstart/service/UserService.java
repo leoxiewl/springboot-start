@@ -4,8 +4,10 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.leo.springbootstart.model.dto.user.UserQueryRequest;
 import com.leo.springbootstart.model.entity.User;
+import com.leo.springbootstart.model.vo.LoginUserVO;
 import com.leo.springbootstart.model.vo.UserVO;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**
@@ -34,4 +36,5 @@ public interface UserService extends IService<User> {
 
     Long register(String userAccount, String userPassword, String checkPassword);
 
+    LoginUserVO userLogin(String userAccount, String userPassword, HttpServletRequest request);
 }

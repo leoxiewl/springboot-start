@@ -3,12 +3,12 @@ package com.leo.springbootstart.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.leo.springbootstart.common.ApiCode;
 import com.leo.springbootstart.common.DeleteRequest;
+import com.leo.springbootstart.common.ErrorCode;
 import com.leo.springbootstart.common.R;
-import com.leo.springbootstart.model.dto.user.UserAddRequest;
-import com.leo.springbootstart.model.dto.user.UserQueryRequest;
-import com.leo.springbootstart.model.dto.user.UserRegisterRequest;
-import com.leo.springbootstart.model.dto.user.UserUpdateRequest;
+import com.leo.springbootstart.exception.BusinessException;
+import com.leo.springbootstart.model.dto.user.*;
 import com.leo.springbootstart.model.entity.User;
+import com.leo.springbootstart.model.vo.LoginUserVO;
 import com.leo.springbootstart.model.vo.UserVO;
 import com.leo.springbootstart.service.UserService;
 import org.apache.commons.lang3.StringUtils;
@@ -16,6 +16,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 @RestController
@@ -42,6 +43,20 @@ public class UserController {
             return R.failed(ApiCode.FAILED.getCode(), "注册失败");
         }
         return R.success(userId);
+    }
+
+    @PostMapping("/login")
+    public R<LoginUserVO> userLogin(@RequestBody UserLoginRequest userLoginRequest, HttpServletRequest request) {
+        if (userLoginRequest == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        String userAccount = userLoginRequest.getUserAccount();
+        String userPassword = userLoginRequest.getUserPassword();
+        if (StringUtils.isAnyBlank(userAccount, userPassword)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        LoginUserVO loginUserVO = userService.userLogin(userAccount, userPassword, request);
+        return R.success(loginUserVO);
     }
 
     /**
