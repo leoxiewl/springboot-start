@@ -6,10 +6,12 @@ import com.leo.springbootstart.common.DeleteRequest;
 import com.leo.springbootstart.common.R;
 import com.leo.springbootstart.model.dto.user.UserAddRequest;
 import com.leo.springbootstart.model.dto.user.UserQueryRequest;
+import com.leo.springbootstart.model.dto.user.UserRegisterRequest;
 import com.leo.springbootstart.model.dto.user.UserUpdateRequest;
 import com.leo.springbootstart.model.entity.User;
 import com.leo.springbootstart.model.vo.UserVO;
 import com.leo.springbootstart.service.UserService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,6 +23,26 @@ import java.util.List;
 public class UserController {
     @Resource
     private UserService userService;
+
+    @PostMapping("/register")
+    public R<Long> register(@RequestBody UserRegisterRequest userRegisterRequest) {
+        if (userRegisterRequest == null) {
+            return R.failed(ApiCode.FAILED.getCode(), "参数错误");
+        }
+
+        String userAccount = userRegisterRequest.getUserAccount();
+        String userPassword = userRegisterRequest.getUserPassword();
+        String checkPassword = userRegisterRequest.getCheckPassword();
+        if (StringUtils.isAnyBlank(userAccount, userPassword, checkPassword)) {
+            return R.failed(ApiCode.FAILED.getCode(), "参数错误");
+        }
+
+        Long userId = userService.register(userAccount, userPassword, checkPassword);
+        if (userId <= 0) {
+            return R.failed(ApiCode.FAILED.getCode(), "注册失败");
+        }
+        return R.success(userId);
+    }
 
     /**
      * 通过 id 获取 userVO 类

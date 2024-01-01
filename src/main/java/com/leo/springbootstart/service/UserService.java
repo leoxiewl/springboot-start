@@ -31,4 +31,7 @@ public interface UserService extends IService<User> {
      * @return
      */
     UserVO transferUserVO(User user);
+
+    Long register(String userAccount, String userPassword, String checkPassword);
+
 }
