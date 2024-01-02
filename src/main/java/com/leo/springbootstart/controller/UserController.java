@@ -60,6 +60,21 @@ public class UserController {
     }
 
     /**
+     * 用户注销
+     *
+     * @param request
+     * @return
+     */
+    @PostMapping("/logout")
+    public R<Boolean> userLogout(HttpServletRequest request) {
+        if (request == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        boolean result = userService.userLogout(request);
+        return R.success(result);
+    }
+
+    /**
      * 通过 id 获取 userVO 类
      *
      * @param id
