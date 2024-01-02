@@ -75,6 +75,18 @@ public class UserController {
     }
 
     /**
+     * 获取当前登录用户
+     *
+     * @param request
+     * @return
+     */
+    @GetMapping("/get/login")
+    public R<LoginUserVO> getLoginUser(HttpServletRequest request) {
+        LoginUserVO user = userService.getLoginUser(request);
+        return R.success(user);
+    }
+
+    /**
      * 通过 id 获取 userVO 类
      *
      * @param id
