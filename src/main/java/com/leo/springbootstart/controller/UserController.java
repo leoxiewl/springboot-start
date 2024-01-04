@@ -1,6 +1,7 @@
 package com.leo.springbootstart.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.leo.springbootstart.annotation.AuthCheck;
 import com.leo.springbootstart.common.ApiCode;
 import com.leo.springbootstart.common.DeleteRequest;
 import com.leo.springbootstart.common.ErrorCode;
@@ -229,6 +230,7 @@ public class UserController {
      * @param id
      * @return
      */
+    @AuthCheck(mustRole = "admin")
     @GetMapping("/get")
     public R<User> getUserById(long id) {
         if (id <= 0) {
