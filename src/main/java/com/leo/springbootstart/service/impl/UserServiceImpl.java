@@ -8,6 +8,7 @@ import com.leo.springbootstart.exception.BusinessException;
 import com.leo.springbootstart.mapper.UserMapper;
 import com.leo.springbootstart.model.dto.user.UserQueryRequest;
 import com.leo.springbootstart.model.entity.User;
+import com.leo.springbootstart.model.enums.UserRoleEnum;
 import com.leo.springbootstart.model.vo.LoginUserVO;
 import com.leo.springbootstart.model.vo.UserVO;
 import com.leo.springbootstart.service.UserService;
@@ -166,6 +167,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         return true;
     }
 
+    // TODO 坑 因为有缓存，修改权限后不能及时更新
     @Override
     public LoginUserVO getLoginUser(HttpServletRequest request) {
         // 先判断是否已登录
@@ -182,6 +184,46 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
 //        }
         return currentUser;
     }
+
+    @Override
+    public LoginUserVO getLoginUserPermitNull(HttpServletRequest request) {
+        // 先判断是否已登录
+        Object userObj = request.getSession().getAttribute(USER_LOGIN_STATE);
+        LoginUserVO currentUser = (LoginUserVO) userObj;
+        if (currentUser == null || currentUser.getId() == null) {
+            return null;
+        }
+        // 从数据库查询（追求性能的话可以注释，直接走缓存）
+        LoginUserVO loginUserVO = new LoginUserVO();
+        User user = this.getById(currentUser.getId());
+        BeanUtils.copyProperties(user, loginUserVO);
+        return loginUserVO;
+    }
+
+    @Override
+    public boolean isAdmin(HttpServletRequest request) {
+
+        // 仅管理员可查询
+        Object userObj = request.getSession().getAttribute(USER_LOGIN_STATE);
+        User user = (User) userObj;
+        return isAdmin(user);
+    }
+
+    @Override
+    public boolean isAdmin(User user) {
+        return user != null && UserRoleEnum.ADMIN.getValue().equals(user.getUserRole());
+    }
+
+    @Override
+    public UserVO getUserVO(User user) {
+        if (user == null) {
+            return null;
+        }
+        UserVO userVO = new UserVO();
+        BeanUtils.copyProperties(user, userVO);
+        return userVO;
+    }
+
 
 }
 
