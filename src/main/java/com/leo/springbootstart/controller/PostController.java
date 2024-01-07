@@ -14,7 +14,6 @@ import com.leo.springbootstart.model.dto.post.PostEditRequest;
 import com.leo.springbootstart.model.dto.post.PostQueryRequest;
 import com.leo.springbootstart.model.dto.post.PostUpdateRequest;
 import com.leo.springbootstart.model.entity.Post;
-import com.leo.springbootstart.model.entity.User;
 import com.leo.springbootstart.model.vo.LoginUserVO;
 import com.leo.springbootstart.model.vo.PostVO;
 import com.leo.springbootstart.service.PostService;
@@ -105,6 +104,7 @@ public class PostController {
 
     /**
      * 更新（仅管理员）
+     * 已有参数，传什么改什么，传空字符串就改为空字符串
      *
      * @param postUpdateRequest
      * @return
@@ -218,6 +218,7 @@ public class PostController {
 
     /**
      * 编辑（用户）
+     * 不能改空字符串
      *
      * @param postEditRequest
      * @param request
@@ -228,28 +229,7 @@ public class PostController {
         if (postEditRequest == null || postEditRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        Post post = new Post();
-        BeanUtils.copyProperties(postEditRequest, post);
-        List<String> tags = postEditRequest.getTags();
-        if (tags != null) {
-            post.setTags(GSON.toJson(tags));
-        }
-        // 参数校验
-        postService.validPost(post, false);
-        LoginUserVO loginUser = userService.getLoginUser(request);
-        long id = postEditRequest.getId();
-        // 判断是否存在
-        Post oldPost = postService.getById(id);
-        if (oldPost == null) {
-            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
-        }
-        User user = new User();
-        BeanUtils.copyProperties(loginUser, user);
-        // 仅本人或管理员可编辑
-        if (!oldPost.getUserId().equals(loginUser.getId()) && !userService.isAdmin(user)) {
-            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
-        }
-        boolean result = postService.updateById(post);
+        boolean result = postService.editPost(postEditRequest, request);
         return R.success(result);
     }
 

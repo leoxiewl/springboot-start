@@ -3,6 +3,7 @@ package com.leo.springbootstart.service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.leo.springbootstart.model.dto.post.PostEditRequest;
 import com.leo.springbootstart.model.dto.post.PostQueryRequest;
 import com.leo.springbootstart.model.entity.Post;
 import com.leo.springbootstart.model.vo.PostVO;
@@ -29,4 +30,6 @@ public interface PostService extends IService<Post> {
     QueryWrapper<Post> getQueryWrapper(PostQueryRequest postQueryRequest);
 
     Page<PostVO> getPostVOPage(Page<Post> postPage, HttpServletRequest request);
+
+    boolean editPost(PostEditRequest postEditRequest, HttpServletRequest request);
 }

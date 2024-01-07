@@ -4,18 +4,22 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.google.gson.Gson;
 import com.leo.springbootstart.common.ErrorCode;
 import com.leo.springbootstart.exception.BusinessException;
 import com.leo.springbootstart.mapper.PostMapper;
+import com.leo.springbootstart.model.dto.post.PostEditRequest;
 import com.leo.springbootstart.model.dto.post.PostQueryRequest;
 import com.leo.springbootstart.model.entity.Post;
 import com.leo.springbootstart.model.entity.User;
+import com.leo.springbootstart.model.vo.LoginUserVO;
 import com.leo.springbootstart.model.vo.PostVO;
 import com.leo.springbootstart.model.vo.UserVO;
 import com.leo.springbootstart.service.PostService;
 import com.leo.springbootstart.service.UserService;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -34,6 +38,7 @@ import java.util.stream.Collectors;
 public class PostServiceImpl extends ServiceImpl<PostMapper, Post>
         implements PostService {
 
+    private static final Gson GSON = new Gson();
     @Resource
     private UserService userService;
 
@@ -132,6 +137,43 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post>
         }).collect(Collectors.toList());
         postVOPage.setRecords(postVOList);
         return postVOPage;
+    }
+
+    @Override
+    public boolean editPost(PostEditRequest postEditRequest, HttpServletRequest request) {
+        Post post = new Post();
+        Long id = postEditRequest.getId();
+        String title = postEditRequest.getTitle();
+        String content = postEditRequest.getContent();
+        if (id <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "id 错误");
+        }
+        post.setId(id);
+        if (StringUtils.isNotBlank(title)) {
+            post.setTitle(title);
+        }
+        if (StringUtils.isNotBlank(content)) {
+            post.setContent(content);
+        }
+        List<String> tags = postEditRequest.getTags();
+        if (tags != null) {
+            post.setTags(GSON.toJson(tags));
+        }
+        // 参数校验
+        this.validPost(post, false);
+        LoginUserVO loginUser = userService.getLoginUser(request);
+        // 判断是否存在
+        Post oldPost = this.getById(id);
+        if (oldPost == null) {
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
+        }
+        User user = new User();
+        BeanUtils.copyProperties(loginUser, user);
+        // 仅本人或管理员可编辑
+        if (!oldPost.getUserId().equals(loginUser.getId()) && !userService.isAdmin(user)) {
+            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
+        }
+        return this.updateById(post);
     }
 }
 
