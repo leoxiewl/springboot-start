@@ -13,6 +13,7 @@ import com.leo.springbootstart.model.vo.LoginUserVO;
 import com.leo.springbootstart.model.vo.UserVO;
 import com.leo.springbootstart.service.UserService;
 import com.leo.springbootstart.utils.AccountValidator;
+import com.leo.springbootstart.utils.SqlUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -46,13 +47,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             return queryWrapper;
             // throw new BusinessException(ErrorCode.PARAMS_ERROR.getCode(), "参数错误");
         }
-
         long id = userQueryRequest.getId();
         String userName = userQueryRequest.getUserName();
         String userAccount = userQueryRequest.getUserAccount();
         String userRole = userQueryRequest.getUserRole();
-        long current = userQueryRequest.getCurrent();
-        long pageSize = userQueryRequest.getPageSize();
+        String sortField = userQueryRequest.getSortField();
+        String sortOrder = userQueryRequest.getSortOrder();
         if (id > 0) {
             queryWrapper.eq("id", id);
         }
@@ -65,7 +65,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         if (userRole != null && !userRole.isEmpty()) {
             queryWrapper.like("user_role", userRole);
         }
-        queryWrapper.last("limit " + (current - 1) * pageSize + "," + pageSize);
+        queryWrapper.orderBy(SqlUtils.validSortField(sortField), sortOrder.equals(CommonConstant.SORT_ORDER_ASC),
+                sortField);
         return queryWrapper;
     }
 

@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.gson.Gson;
 import com.leo.springbootstart.common.ErrorCode;
+import com.leo.springbootstart.constant.CommonConstant;
 import com.leo.springbootstart.exception.BusinessException;
 import com.leo.springbootstart.mapper.PostMapper;
 import com.leo.springbootstart.model.dto.post.PostEditRequest;
@@ -17,6 +18,7 @@ import com.leo.springbootstart.model.vo.PostVO;
 import com.leo.springbootstart.model.vo.UserVO;
 import com.leo.springbootstart.service.PostService;
 import com.leo.springbootstart.service.UserService;
+import com.leo.springbootstart.utils.SqlUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -92,6 +94,8 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post>
         List<String> tagList = postQueryRequest.getTags();
         Long userId = postQueryRequest.getUserId();
         Long notId = postQueryRequest.getNotId();
+        String sortField = postQueryRequest.getSortField();
+        String sortOrder = postQueryRequest.getSortOrder();
         // 拼接查询条件
         if (StringUtils.isNotBlank(searchText)) {
             queryWrapper.like("title", searchText).or().like("content", searchText);
@@ -107,9 +111,8 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post>
         queryWrapper.eq(ObjectUtils.isNotEmpty(id), "id", id);
         queryWrapper.eq(ObjectUtils.isNotEmpty(userId), "user_id", userId);
         queryWrapper.eq("is_delete", false);
-        long current = postQueryRequest.getCurrent();
-        long pageSize = postQueryRequest.getPageSize();
-        queryWrapper.last("limit " + (current - 1) * pageSize + "," + pageSize);
+        queryWrapper.orderBy(SqlUtils.validSortField(sortField), sortOrder.equals(CommonConstant.SORT_ORDER_ASC),
+                sortField);
         return queryWrapper;
     }
 
