@@ -126,6 +126,10 @@ public class UserController {
         List<UserVO> userVOS = userService.transferUserVOList(page.getRecords());
         Page<UserVO> userVOPage = new Page<>();
         userVOPage.setRecords(userVOS);
+        userVOPage.setTotal(page.getTotal());
+        userVOPage.setSize(page.getSize());
+        userVOPage.setCurrent(page.getCurrent());
+        userVOPage.setPages(page.getPages());
         return R.success(userVOPage);
     }
 
